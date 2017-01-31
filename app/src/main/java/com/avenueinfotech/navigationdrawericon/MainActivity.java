@@ -3,6 +3,9 @@ package com.avenueinfotech.navigationdrawericon;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -35,13 +38,15 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity {
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    @BindView(R.id.mtoolbar)
+    Toolbar mtoolbar;
 //    @BindView(R.id.drawer_recyclerView) RecyclerView drawerRecyclerView;
     private Drawer.Result navigationDrawerLeft;
     private Drawer.Result getNavigationDrawerRight;
     private AccountHeader.Result headerNavigationLeft;
     private int mPositionClicked;
+    private ViewPager mViewPager;
+    private int mItemDrawerSelected;
 
     private OnCheckedChangeListener mOnCheckedChangeListener = new OnCheckedChangeListener(){
         @Override
@@ -56,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mtoolbar);
 
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().setHomeButtonEnabled(false);
@@ -130,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         //navigation Drawer
         navigationDrawerLeft = new Drawer()
                 .withActivity(this)
-                .withToolbar(toolbar)
+                .withToolbar(mtoolbar)
                 .withDisplayBelowToolbar(false)
                 .withActionBarDrawerToggleAnimated(true)
                 .withDrawerGravity(Gravity.LEFT)
@@ -147,22 +152,54 @@ public class MainActivity extends AppCompatActivity {
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l, IDrawerItem iDrawerItem) {
-                        for (int count = 0, tam = navigationDrawerLeft.getDrawerItems().size();count < tam; count++){
-                            if (count == mPositionClicked && mPositionClicked <= 3){
-                                PrimaryDrawerItem aux = (PrimaryDrawerItem) navigationDrawerLeft.getDrawerItems().get(count);
-                                aux.setIcon(getResources().getDrawable( getCorretcDrawerIcon( count, false)));
-                                break;
-                            }
+//                        mViewPager.setCurrentItem(i);
+
+
+                        Fragment frag = null;
+                        mItemDrawerSelected = i;
+
+                        if(i == 0){ // ALL CARS
+                            frag = new CarFragment();
+                        }
+                        else if(i == 1){ // LUXURY CAR
+                            frag = new LuxuryCarFragment();
+                        }
+                        else if(i == 2){ // SPORT CAR
+                            frag = new SportCarFragment();
+                        }
+                        else if(i == 3){ // OLD CAR
+                            frag = new OldCarFragment();
+                        }
+                        else if(i == 4){ // POPULAR CAR
+                            frag = new PopularCarFragment();
                         }
 
-                        if(i <= 3){
-                            ((PrimaryDrawerItem) iDrawerItem).setIcon(getResources().getDrawable( getCorretcDrawerIcon( i, true)));
-                        }
+                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                        ft.replace(R.id.rl_fragment_container, frag, "mainFrag");
+                        ft.commit();
 
-                        mPositionClicked = i;
-                        navigationDrawerLeft.getAdapter().notifyDataSetChanged();
+//                        mToolbar.setTitle( ((PrimaryDrawerItem) iDrawerItem).getName() );
                     }
                 })
+//                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+//                    @Override
+//                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l, IDrawerItem iDrawerItem) {
+//                        for (int count = 0, tam = navigationDrawerLeft.getDrawerItems().size();count < tam; count++){
+//                            if (count == mPositionClicked && mPositionClicked <= 3){
+//                                PrimaryDrawerItem aux = (PrimaryDrawerItem) navigationDrawerLeft.getDrawerItems().get(count);
+//                                aux.setIcon(getResources().getDrawable( getCorretcDrawerIcon( count, false)));
+//                                break;
+//                            }
+//                        }
+//
+//                        if(i <= 3){
+//                            ((PrimaryDrawerItem) iDrawerItem).setIcon(getResources().getDrawable( getCorretcDrawerIcon( i, true)));
+//                        }
+//
+//                        mPositionClicked = i;
+//                        navigationDrawerLeft.getAdapter().notifyDataSetChanged();
+//                    }
+//                })
                 .withOnDrawerItemLongClickListener(new Drawer.OnDrawerItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int i, long l, IDrawerItem iDrawerItem) {
